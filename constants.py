@@ -9,6 +9,9 @@ KEYWORDS: list[str] = [
     "VSCode",
     "Settings",
     "GitHub",
+    "Space",
+    "Enter",
+    "Escape",
 ]
 
 TOOLS_SCHEMA: list[dict] = [

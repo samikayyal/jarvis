@@ -8,8 +8,7 @@ from constants import TOOLS_SCHEMA
 load_dotenv()
 
 
-def interpret_intent(transcribed_text: str) -> None:
-    client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+def interpret_intent(transcribed_text: str) -> str | None:
     user_context = """
     USER CONTEXT:
     - Main Projects Directory: 'D:/Projects/'
@@ -35,26 +34,32 @@ def interpret_intent(transcribed_text: str) -> None:
         }}
     }}
     """
-    completion = client.chat.completions.create(
-        model="openai/gpt-oss-20b",
-        messages=[
-            {
-                "role": "system",
-                "content": system_prompt,
-            },
-            {
-                "role": "user",
-                "content": transcribed_text,
-            },
-        ],
-        temperature=0,
-        reasoning_effort="high",
-        stream=True,
-    )
-    for chunk in completion:
-        print(chunk.choices[0].delta.content or "", end="")
+    try:
+        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+        completion = client.chat.completions.create(
+            model="openai/gpt-oss-20b",
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": transcribed_text,
+                },
+            ],
+            temperature=0,
+            reasoning_effort="high",
+            stream=False,
+        )
+        return completion.choices[0].message.content or None
+    except Exception as e:
+        print(f"[!] Error interpreting intent: {e}")
 
 
 if __name__ == "__main__":
     sample_text = "مرحبا كيفك؟ افتح لي Spotify."
-    interpret_intent(sample_text)
+    print("Interpretation Result:")
+    print(interpret_intent(sample_text))
+    if not interpret_intent(sample_text):
+        exit(1)
