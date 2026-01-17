@@ -1,9 +1,8 @@
 import json
 
 import speech_recognizer
+from constants import AVAILABLE_FUNCTIONS
 from llm import interpret_intent
-from tools.open_apps import open_application
-from tools.press_key import press_key
 
 
 def execute_function(function_name: str, args: dict):
@@ -11,17 +10,9 @@ def execute_function(function_name: str, args: dict):
     Maps the string function name from the LLM to the actual Python function.
     """
     # Map of string names to actual function objects
-    available_functions = {
-        "open_application": open_application,
-        "open_url": lambda url: True,
-        "web_search": lambda query: True,
-        "open_directory": lambda path: True,
-        "open_vscode_project": lambda path: True,
-        "press_keyboard_key": press_key,
-    }
 
-    if function_name in available_functions:
-        func = available_functions[function_name]
+    if function_name in AVAILABLE_FUNCTIONS:
+        func = AVAILABLE_FUNCTIONS[function_name]
         # Call the function with **args (unpacks the dictionary)
         return func(**args)
     else:
