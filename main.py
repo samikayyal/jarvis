@@ -21,8 +21,13 @@ def execute_function(function_name: str, args: dict):
 
 def main():
     filename = speech_recognizer.record()
+    if not filename:
+        return
 
     transcription = speech_recognizer.transcribe(filename)
+    if not transcription:
+        return
+
     print("Transcription:")
     print(transcription)
 

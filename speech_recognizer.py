@@ -10,7 +10,7 @@ from constants import KEYWORDS
 load_dotenv()
 
 
-def record() -> str:
+def record() -> str | None:
     """
     Returns:
         str: The filename where the recorded audio is saved.
@@ -39,21 +39,21 @@ def record() -> str:
         return filename
     except Exception as e:
         print(f"Error during recording: {e}")
-        return ""
+        return None
 
 
-def transcribe(filename: str) -> str:
+def transcribe(filename: str) -> str | None:
     """
     Returns:
         str: Transcribed text from the audio data.
     """
     if not filename:
         print("Error: No filename provided for transcription.")
-        return ""
+        return None
 
     if not os.path.exists(filename):
         print(f"Error: File '{filename}' not found.")
-        return ""
+        return None
 
     # Transcribe the recorded audio using Groq API
     try:
@@ -67,6 +67,7 @@ def transcribe(filename: str) -> str:
             f"2. Ifta7 li VSCode 3al project esma 'Electricity Detection'"
             f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
             f"4. Kbes Space"
+            f"5. Tafi el laptop"
         )
         with open(filename, "rb") as file:
             transcription = client.audio.transcriptions.create(
@@ -77,10 +78,10 @@ def transcribe(filename: str) -> str:
                 temperature=0,
                 language="ar",
             )
-        return transcription.text
+        return transcription.text or None
     except Exception as e:
         print(f"Error during transcription: {e}")
-        return ""
+        return None
 
 
 if __name__ == "__main__":
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     if not filename:
         exit(1)
 
-    transcription = transcribe(filename)
+    transcription = transcribe(filename)  # type: ignore
     print("Transcription:")
     print(transcription)
 

@@ -55,6 +55,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
         return completion.choices[0].message.content or None
     except Exception as e:
         print(f"[!] Error interpreting intent: {e}")
+        return None
 
 
 if __name__ == "__main__":

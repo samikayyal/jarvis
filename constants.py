@@ -1,6 +1,8 @@
+from typing import Callable
+
 from tools.browsers import open_url, web_search
+from tools.miscellaneous import press_key, shutdown_system
 from tools.open_apps import open_application, open_directory
-from tools.press_key import press_key
 
 KEYWORDS: list[str] = [
     "Spotify",
@@ -20,6 +22,7 @@ KEYWORDS: list[str] = [
     "Downloads",
     "Projects",
     "Shutdown",
+    "Discord",
 ]
 
 TOOLS_SCHEMA: list[dict] = [
@@ -31,7 +34,7 @@ TOOLS_SCHEMA: list[dict] = [
             {
                 "name": "app_name",
                 "type": "string",
-                "description": 'The name of the application to open (e.g., "notepad", "calc").',
+                "description": "The name of the application to open.",
             }
         ],
     },
@@ -103,12 +106,12 @@ TOOLS_SCHEMA: list[dict] = [
     },
 ]
 
-AVAILABLE_FUNCTIONS = {
+AVAILABLE_FUNCTIONS: dict[str, Callable] = {
     "open_application": open_application,
     "open_url": open_url,
     "web_search": web_search,
     "open_directory": open_directory,
     "open_vscode_project": lambda path: True,
     "press_keyboard_key": press_key,
-    "shutdown_system": lambda: True,
+    "shutdown_system": shutdown_system,
 }
