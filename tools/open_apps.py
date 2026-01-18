@@ -4,7 +4,6 @@ import subprocess
 
 def open_application(app_name: str) -> str:
     print(f"[*] Opening Application: {app_name}")
-
     try:
         script = f'Start-Process "shell:AppsFolder\\$((Get-StartApps | Where-Object {{$_.Name -like "*{app_name}*"}}).AppID)"'
         subprocess.run(["powershell", "-Command", script], check=True)

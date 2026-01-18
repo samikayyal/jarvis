@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "groq>=1.0.0",
+    "keyboard>=0.13.5",
     "pyaudio>=0.2.14",
     "pyautogui>=0.9.54",
     "python-dotenv>=1.2.1",
