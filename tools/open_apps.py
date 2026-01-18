@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 
 def open_application(app_name: str) -> str:
@@ -50,7 +51,11 @@ def open_vscode_project(path: str) -> str:
     if os.path.exists(norm_path):
         try:
             vscode_path = "C:\\Users\\kayya\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
-            os.startfile(vscode_path, "open", norm_path)
+            subprocess.run(
+                [vscode_path, norm_path],
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+            )
             return "Opened"
         except Exception as e:
             print(f"[!] Error opening VSCode project at {path}: {e}")

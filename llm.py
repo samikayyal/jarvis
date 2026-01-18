@@ -9,9 +9,11 @@ load_dotenv()
 
 
 def interpret_intent(transcribed_text: str) -> str | None:
-    user_context = """
+    projects = "\n - ".join(os.listdir("D:/Projects/"))
+    user_context = f"""
     USER CONTEXT:
     - Main Projects Directory: 'D:/Projects/'
+        {projects}
     - Downloads Folder: 'C:/Users/kayya/Downloads/'
     """
 

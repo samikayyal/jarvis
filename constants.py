@@ -2,7 +2,7 @@ from typing import Callable
 
 from tools.browsers import open_url, web_search
 from tools.miscellaneous import press_key, shutdown_system
-from tools.open_apps import open_application, open_directory
+from tools.open_apps import open_application, open_directory, open_vscode_project
 
 KEYWORDS: list[str] = [
     "Spotify",
@@ -23,6 +23,7 @@ KEYWORDS: list[str] = [
     "Projects",
     "Shutdown",
     "Discord",
+    "Laptop",
 ]
 
 TOOLS_SCHEMA: list[dict] = [
@@ -111,7 +112,12 @@ AVAILABLE_FUNCTIONS: dict[str, Callable] = {
     "open_url": open_url,
     "web_search": web_search,
     "open_directory": open_directory,
-    "open_vscode_project": lambda path: True,
+    "open_vscode_project": open_vscode_project,
     "press_keyboard_key": press_key,
     "shutdown_system": shutdown_system,
 }
+
+
+# For testing
+if __name__ == "__main__":
+    open_vscode_project("D:/Projects/Electricity Detector")
