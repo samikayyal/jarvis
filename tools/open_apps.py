@@ -4,25 +4,14 @@ import subprocess
 
 def open_application(app_name: str) -> str:
     print(f"[*] Opening Application: {app_name}")
+
     try:
-        if app_name.lower() == "spotify":
-            os.startfile("C:\\Users\\kayya\\AppData\\Roaming\\Spotify\\Spotify.exe")
-            return "Opened"
-        if app_name.lower() == "vscode":
-            os.startfile(
-                "C:\\Users\\kayya\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
-            )
-            return "Opened"
-        if app_name.lower() == "discord":
-            os.startfile(
-                "C:\\Users\\kayya\\AppData\\Local\\Discord\\app-1.0.9003\\Discord.exe"
-            )
-            return "Opened"
+        script = f'Start-Process "shell:AppsFolder\\$((Get-StartApps | Where-Object {{$_.Name -like "*{app_name}*"}}).AppID)"'
+        subprocess.run(["powershell", "-Command", script], check=True)
+        return "Opened"
     except Exception as e:
         print(f"[!] Error opening application {app_name}: {e}")
         return "Failed"
-
-    return "Not Found"
 
 
 def open_directory(path: str) -> str:

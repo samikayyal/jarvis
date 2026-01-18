@@ -24,6 +24,7 @@ KEYWORDS: list[str] = [
     "Shutdown",
     "Discord",
     "Laptop",
+    "PSUT",
 ]
 
 TOOLS_SCHEMA: list[dict] = [
@@ -120,4 +121,4 @@ AVAILABLE_FUNCTIONS: dict[str, Callable] = {
 
 # For testing
 if __name__ == "__main__":
-    open_vscode_project("D:/Projects/Electricity Detector")
+    print(open_application("matlab"))
