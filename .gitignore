@@ -15,3 +15,5 @@ wheels/
 # Misc
 recordings/
 uv.lock
+
+test.py

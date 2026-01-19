@@ -35,6 +35,9 @@ def interpret_intent(transcribed_text: str) -> str | None:
             "app_name": "VSCode"
         }}
     }}
+
+    Notes:
+        - If the user wants to open  netflix, use the "open_application" tool with app_name "Netflix".
     """
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))

@@ -29,8 +29,9 @@ def run_conversation_cycle():
     """
     # Play a sound to indicate recording started
     winsound.Beep(1000, 200)
-
+    start_time = time.perf_counter()
     filename = speech_recognizer.record()
+    print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
     if not filename:
         return
 
@@ -39,10 +40,12 @@ def run_conversation_cycle():
         return
 
     print(f"\n User said: {transcription}")
+    print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
 
     # Interpret Intent
     intent_json = interpret_intent(transcription)
     print(f"Intent: {intent_json}")
+    print(f"Interpretation Time: {time.perf_counter() - start_time:.2f} seconds")
 
     # Execute
     if intent_json:
@@ -55,6 +58,7 @@ def run_conversation_cycle():
             result = execute_function(tool_name, parameters)
 
             print(f"Result: {result}")
+            print(f"Execution Time: {time.perf_counter() - start_time:.2f} seconds")
 
             # Play a success sound (Low-High)
             winsound.Beep(800, 100)

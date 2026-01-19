@@ -64,7 +64,7 @@ def transcribe(filename: str) -> str | None:
             f"Context: {KEYWORDS}. "
             f"Examples:"
             f"1. Fta7 li Spotify bel playlist 'Fresh'"
-            f"2. Ifta7 li VSCode 3al project esma 'Electricity Detection'"
+            f"2. Fta7 VSCode 3a project esma 'Electricity Detection'"
             f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
             f"4. Kbes Space"
             f"5. Tafi el laptop"

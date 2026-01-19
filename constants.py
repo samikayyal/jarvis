@@ -25,6 +25,7 @@ KEYWORDS: list[str] = [
     "Discord",
     "Laptop",
     "PSUT",
+    "Matlab",
 ]
 
 TOOLS_SCHEMA: list[dict] = [
