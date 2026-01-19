@@ -41,7 +41,7 @@ def open_vscode_project(path: str) -> str:
             vscode_path = "C:\\Users\\kayya\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
             subprocess.run(
                 [vscode_path, norm_path],
-                shell=True,
+                shell=False,  # To be able to pass list of args
                 creationflags=subprocess.CREATE_NO_WINDOW,
             )
             return "Opened"

@@ -62,7 +62,7 @@ def transcribe(filename: str) -> str | None:
             f"This is a conversation in Syrian Arabic (Levantine) mixed with English technical terms. "
             f"Do not translate technical terms. Write technical terms in Latin script. "
             f"Context: {KEYWORDS}. "
-            f"Examples:"
+            f"Examples: The options are not limited to these, but here are some examples:"
             f"1. Fta7 li Spotify bel playlist 'Fresh'"
             f"2. Fta7 VSCode 3a project esma 'Electricity Detection'"
             f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
