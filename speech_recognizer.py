@@ -1,4 +1,5 @@
 import os
+import winsound
 from datetime import datetime
 
 import speech_recognition as sr
@@ -31,6 +32,8 @@ def record() -> str | None:
         # higher sample rate for better quality
         with sr.Microphone(sample_rate=16000) as source:
             print("Please speak now...")
+            # Play a sound to indicate recording started
+            winsound.Beep(1000, 200)
             audio_data = recognizer.listen(source)
             with open(filename, "wb") as f:
                 f.write(audio_data.get_wav_data())

@@ -27,8 +27,6 @@ def run_conversation_cycle():
     """
     Runs one full cycle: Record -> Transcribe -> Interpret -> Execute
     """
-    # Play a sound to indicate recording started
-    winsound.Beep(1000, 200)
     start_time = time.perf_counter()
     filename = speech_recognizer.record()
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
