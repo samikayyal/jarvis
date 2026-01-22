@@ -5,6 +5,7 @@ import winsound
 import keyboard
 
 import speech_recognizer
+from activator import AssistantActivator
 from constants import AVAILABLE_FUNCTIONS
 from llm import interpret_intent
 
@@ -69,27 +70,37 @@ def run_conversation_cycle():
 
 def main():
     TRIGGER_KEY = "scroll lock"
+    activator = AssistantActivator("hey_jarvis_v0.1")
 
     print("🤖 Assistant is running...")
-    print(f"👉 Press '{TRIGGER_KEY}' to speak.")
+    print(f"👉 Say 'Jarvis' or Press '{TRIGGER_KEY}' to speak.")
 
     while True:
         try:
-            # This blocks the code until the key is pressed
-            keyboard.wait(TRIGGER_KEY)
+            trigger_source = activator.wait_for_activation(TRIGGER_KEY)
+            if trigger_source == "voice":
+                print("\n[Activated by Voice]")
+            elif trigger_source == "key":
+                print("\n[Activated by Key Press]")
+            else:
+                print("\n[Unknown Activation]")
+                continue
+
+            # Acknowledgement beep
+            winsound.Beep(600, 100)
 
             run_conversation_cycle()
+            print("\n Waiting for trigger ...")
 
-            print(f"\n Waiting for trigger ({TRIGGER_KEY})...")
-
-            # Small sleep to prevent accidental double-triggering
-            # if you hold the key slightly too long
-            time.sleep(1)
+            # Small buffer to prevent immediate re-triggering
+            time.sleep(1.5)
 
         except KeyboardInterrupt:
             break
         except Exception as e:
             print(f"Critical Error in main loop: {e}")
+            # Sleep briefly to avoid infinite error loops
+            time.sleep(1)
 
 
 if __name__ == "__main__":
