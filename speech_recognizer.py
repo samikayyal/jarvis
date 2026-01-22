@@ -7,7 +7,7 @@ import speech_recognition as sr
 from dotenv import load_dotenv
 from groq import Groq
 
-from constants import KEYWORDS
+from constants import KEYWORDS  # noqa: F401
 
 load_dotenv()
 
