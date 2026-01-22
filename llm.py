@@ -21,6 +21,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
      You are a smart desktop assistant for a developer. 
         The user speaks Syrian Arabic mixed with English technical terms.
         Analyze the user's request and map it to the correct tool function.
+        The user's command may write English technical terms in Arabic.
         
         {user_context}
 
@@ -54,9 +55,10 @@ def interpret_intent(transcribed_text: str) -> str | None:
                 },
             ],
             temperature=0,
-            reasoning_effort="high",
+            reasoning_effort="medium",
             stream=False,
         )
+
         return completion.choices[0].message.content or None
     except Exception as e:
         print(f"[!] Error interpreting intent: {e}")

@@ -1,4 +1,5 @@
 import os
+import time
 import winsound
 from datetime import datetime
 
@@ -25,7 +26,7 @@ def record() -> str | None:
         recognizer = sr.Recognizer()
 
         # How long of a pause indicates the end of a sentence
-        recognizer.pause_threshold = 1.1
+        recognizer.pause_threshold = 1.3
         # Minimum audio energy to consider for recording
         recognizer.energy_threshold = 500
 
@@ -62,20 +63,20 @@ def transcribe(filename: str) -> str | None:
     try:
         client = Groq()
         system_prompt: str = (
-            f"This is a conversation in Syrian Arabic (Levantine) mixed with English technical terms. "
-            f"Do not translate technical terms. Write technical terms in Latin script. "
-            f"Context: {KEYWORDS}. "
-            f"Examples: The options are not limited to these, but here are some examples:"
-            f"1. Fta7 li Spotify bel playlist 'Fresh'"
-            f"2. Fta7 VSCode 3a project esma 'Electricity Detection'"
-            f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
-            f"4. Kbes Space"
-            f"5. Tafi el laptop"
+            f"This is a conversation in Syrian Arabic (Levantine) mixed with English technical terms. "  # noqa: F541
+            f"Do not translate technical terms. Write technical terms in Latin script. "  # noqa: F541
+            # f"Context: {KEYWORDS}. "
+            # f"Examples: The options are not limited to these, but here are some:"
+            # f"1. Fta7 li Spotify bel playlist 'Fresh'"
+            # f"2. Fta7 VSCode 3a project esma 'Electricity Detection'"
+            # f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
+            # f"4. Kbes Space"
+            # f"5. Tafi el laptop"
         )
         with open(filename, "rb") as file:
             transcription = client.audio.transcriptions.create(
                 file=(filename, file.read()),
-                model="whisper-large-v3-turbo",
+                model="whisper-large-v3",
                 response_format="verbose_json",
                 prompt=system_prompt,
                 temperature=0,
@@ -92,9 +93,13 @@ if __name__ == "__main__":
     if not filename:
         exit(1)
 
+    start_time = time.perf_counter()
     transcription = transcribe(filename)  # type: ignore
+    print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
     print("Transcription:")
     print(transcription)
+    with open("test.txt", "w", encoding="utf-8") as f:
+        f.write(transcription or "")
 
     if not transcription:
         exit(1)
