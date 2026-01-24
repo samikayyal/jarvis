@@ -1,17 +1,17 @@
+import time
+
 import keyboard
 import numpy as np
-import openwakeword
 import pyaudio
 from openwakeword.model import Model
 
 
 class AssistantActivator:
-    def __init__(self, model_name="hey_jarvis_v0.1"):
-        self.model_name = model_name
+    def __init__(self):
+        self.model_name = "jarvis"
 
         # Load the wake word model
-        openwakeword.utils.download_models([model_name])
-        self.model = Model(wakeword_models=[f'{model_name}.tflite'])
+        self.model = Model(wakeword_models=[f"{self.model_name}.tflite"])
 
         self.CHUNK = 1280
         self.FORMAT = pyaudio.paInt16
@@ -46,7 +46,7 @@ class AssistantActivator:
                 predictions = self.model.predict(audio_np)
 
                 # Check Wake Word
-                if predictions[f"{self.model_name}.tflite"] >= 0.5:
+                if predictions[self.model_name] >= 0.5:
                     triggered_by = "voice"
                     break
 
@@ -65,9 +65,9 @@ class AssistantActivator:
 
 
 if __name__ == "__main__":
-    activator = AssistantActivator("hey_jarvis_v0.1")
+    activator = AssistantActivator()
     while True:
-        print("Listening for wake word or key press...")
+        print("\nListening for wake word or key press...")
         source = activator.wait_for_activation("scroll lock")
         print(f"Activated by: {source}")
         time.sleep(1)  # Debounce delay
