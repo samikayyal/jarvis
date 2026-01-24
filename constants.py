@@ -10,6 +10,9 @@ PROJECTS_DIR = "D:/Projects/"
 # Can use any qroq model, like "openai/gpt-oss-20b"
 LLM_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
 
+# Wake Word Model Settings
+JARVIS_DETECTION_THRESHOLD = 0.5
+
 KEYWORDS: list[str] = [
     "Spotify",
     "Portal",

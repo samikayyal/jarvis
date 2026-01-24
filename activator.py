@@ -5,6 +5,8 @@ import numpy as np
 import pyaudio
 from openwakeword.model import Model
 
+from constants import JARVIS_DETECTION_THRESHOLD
+
 
 class AssistantActivator:
     def __init__(self):
@@ -46,7 +48,7 @@ class AssistantActivator:
                 predictions = self.model.predict(audio_np)
 
                 # Check Wake Word
-                if predictions[self.model_name] >= 0.5:
+                if predictions[self.model_name] >= JARVIS_DETECTION_THRESHOLD:
                     triggered_by = "voice"
                     break
 
