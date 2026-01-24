@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
-from constants import PROJECTS_DIR, TOOLS_SCHEMA
+from constants import LLM_MODEL, PROJECTS_DIR, TOOLS_SCHEMA
 
 load_dotenv()
 
@@ -45,7 +45,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
         completion = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model=LLM_MODEL,
             messages=[
                 {
                     "role": "system",

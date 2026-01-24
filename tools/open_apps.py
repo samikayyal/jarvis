@@ -63,7 +63,7 @@ def open_application(app_name: str) -> str:
             print(f"[!] Error opening application {app_name}: {e}")
             return "Failed"
 
-    return "Failed" 
+    return "Failed"
 
 
 def open_directory(path: str) -> str:

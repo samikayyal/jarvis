@@ -59,9 +59,11 @@ class AssistantActivator:
             # Close stream so main.py can use the mic later
             stream.stop_stream()
             stream.close()
-            self.p.terminate()
 
         return triggered_by
+
+    def __del__(self):
+        self.p.terminate()  # Cleanup when program exits
 
 
 if __name__ == "__main__":

@@ -7,6 +7,9 @@ from tools.open_apps import open_application, open_directory, open_vscode_projec
 # User specific things, set by user in program settings
 PROJECTS_DIR = "D:/Projects/"
 
+# Can use any qroq model, like "openai/gpt-oss-20b"
+LLM_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
+
 KEYWORDS: list[str] = [
     "Spotify",
     "Portal",
