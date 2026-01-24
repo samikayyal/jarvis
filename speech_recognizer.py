@@ -80,15 +80,10 @@ def transcribe(audio_data: bytes) -> str | None:
     try:
         client = Groq()
         system_prompt: str = (
-            f"This is a conversation in Syrian Arabic (Levantine) mixed with English technical terms. "  # noqa: F541
-            f"Do not translate technical terms. Write technical terms in Latin script. "  # noqa: F541
-            # f"Context: {KEYWORDS}. "
-            # f"Examples: The options are not limited to these, but here are some:"
-            # f"1. Fta7 li Spotify bel playlist 'Fresh'"
-            # f"2. Fta7 VSCode 3a project esma 'Electricity Detection'"
-            # f"3. 3mel Search 3a Google 3an 'How to implement OAuth2 in Python'"
-            # f"4. Kbes Space"
-            # f"5. Tafi el laptop"
+            "This is a conversation in Syrian Arabic (Levantine) mixed with English technical terms. "
+            "Do not translate technical terms. Write technical terms in Latin script. "
+            "These are some terms the user might use:"
+            "3mel Search عميل سيرش, Fta7 فتاح, Shaghil شغل, Saakker سكر"
         )
         transcription = client.audio.transcriptions.create(
             file=("recording.wav", audio_data),
