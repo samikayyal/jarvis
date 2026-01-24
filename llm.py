@@ -3,18 +3,20 @@ import os
 from dotenv import load_dotenv
 from groq import Groq
 
-from constants import TOOLS_SCHEMA
+from constants import PROJECTS_DIR, TOOLS_SCHEMA
 
 load_dotenv()
 
 
 def interpret_intent(transcribed_text: str) -> str | None:
-    projects = "\n - ".join(os.listdir("D:/Projects/"))
+    projects = "\n - ".join(os.listdir(PROJECTS_DIR))
+    downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
+
     user_context = f"""
     USER CONTEXT:
-    - Main Projects Directory: 'D:/Projects/'
+    - Main Projects Directory: '{PROJECTS_DIR}'
         {projects}
-    - Downloads Folder: 'C:/Users/kayya/Downloads/'
+    - Downloads Folder: '{downloads_dir}'
     """
 
     system_prompt = f"""
@@ -38,7 +40,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
     }}
 
     Notes:
-        - If the user wants to open  netflix, use the "open_application" tool with app_name "Netflix".
+        - If the user wants to open netflix, use the "open_application" tool with app_name "Netflix".
     """
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))

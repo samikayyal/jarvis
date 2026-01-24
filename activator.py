@@ -17,6 +17,7 @@ class AssistantActivator:
         self.FORMAT = pyaudio.paInt16
         self.CHANNELS = 1
         self.SAMPLE_RATE = 16000
+        self.p = pyaudio.PyAudio()
 
     def wait_for_activation(self, trigger_key):
         """
@@ -25,8 +26,7 @@ class AssistantActivator:
         Returns: 'voice' or 'key'
         """
         # Open the stream
-        p = pyaudio.PyAudio()
-        stream = p.open(
+        stream = self.p.open(
             format=self.FORMAT,
             channels=self.CHANNELS,
             rate=self.SAMPLE_RATE,
@@ -59,7 +59,7 @@ class AssistantActivator:
             # Close stream so main.py can use the mic later
             stream.stop_stream()
             stream.close()
-            p.terminate()
+            self.p.terminate()
 
         return triggered_by
 

@@ -12,17 +12,13 @@ from constants import KEYWORDS  # noqa: F401
 load_dotenv()
 
 
-def record() -> str | None:
+def record() -> bytes | None:
     """
     Returns:
-        str: The filename where the recorded audio is saved.
+        bytes: The audio data of the recording.
     """
-    # Record speech into a file using speechrecognition library
+    # Record speech using speechrecognition library
     try:
-        os.makedirs("recordings", exist_ok=True)
-        filename = (
-            f"recordings/recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
-        )
         recognizer = sr.Recognizer()
 
         # How long of a pause indicates the end of a sentence
@@ -36,27 +32,48 @@ def record() -> str | None:
             # Play a sound to indicate recording started
             winsound.Beep(1000, 200)
             audio_data = recognizer.listen(source)
-            with open(filename, "wb") as f:
-                f.write(audio_data.get_wav_data())
-            print("Recording saved")
+            wav_data = audio_data.get_wav_data()
+            print("Recording finished")
 
-        return filename
+        return wav_data
     except Exception as e:
         print(f"Error during recording: {e}")
         return None
 
 
-def transcribe(filename: str) -> str | None:
+def save_recording(audio_data: bytes) -> str | None:
     """
+    Saves the audio data to a file.
+
+    Args:
+        audio_data (bytes): The audio data to save.
+
+    Returns:
+        str: The filename where the audio was saved.
+    """
+    try:
+        os.makedirs("recordings", exist_ok=True)
+        filename = (
+            f"recordings/recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
+        )
+        with open(filename, "wb") as f:
+            f.write(audio_data)
+        print("Recording saved")
+        return filename
+    except Exception as e:
+        print(f"Error saving recording: {e}")
+        return None
+
+
+def transcribe(audio_data: bytes) -> str | None:
+    """
+    Args:
+        audio_data (bytes): The audio data to transcribe.
     Returns:
         str: Transcribed text from the audio data.
     """
-    if not filename:
-        print("Error: No filename provided for transcription.")
-        return None
-
-    if not os.path.exists(filename):
-        print(f"Error: File '{filename}' not found.")
+    if not audio_data:
+        print("Error: No audio data provided for transcription.")
         return None
 
     # Transcribe the recorded audio using Groq API
@@ -73,15 +90,14 @@ def transcribe(filename: str) -> str | None:
             # f"4. Kbes Space"
             # f"5. Tafi el laptop"
         )
-        with open(filename, "rb") as file:
-            transcription = client.audio.transcriptions.create(
-                file=(filename, file.read()),
-                model="whisper-large-v3",
-                response_format="verbose_json",
-                prompt=system_prompt,
-                temperature=0,
-                language="ar",
-            )
+        transcription = client.audio.transcriptions.create(
+            file=("recording.wav", audio_data),
+            model="whisper-large-v3",
+            response_format="verbose_json",
+            prompt=system_prompt,
+            temperature=0,
+            language="ar",
+        )
         return transcription.text or None
     except Exception as e:
         print(f"Error during transcription: {e}")
@@ -89,15 +105,18 @@ def transcribe(filename: str) -> str | None:
 
 
 if __name__ == "__main__":
-    filename = record()
-    if not filename:
+    audio_data = record()
+    if not audio_data:
         exit(1)
 
     start_time = time.perf_counter()
-    transcription = transcribe(filename)  # type: ignore
+    transcription = transcribe(audio_data)  # type: ignore
     print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
     print("Transcription:")
     print(transcription)
+
+    save_recording(audio_data)  # type: ignore
+
     with open("test.txt", "w", encoding="utf-8") as f:
         f.write(transcription or "")
 

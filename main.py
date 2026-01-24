@@ -2,8 +2,6 @@ import json
 import time
 import winsound
 
-import keyboard
-
 import speech_recognizer
 from activator import AssistantActivator
 from constants import AVAILABLE_FUNCTIONS
@@ -29,12 +27,13 @@ def run_conversation_cycle():
     Runs one full cycle: Record -> Transcribe -> Interpret -> Execute
     """
     start_time = time.perf_counter()
-    filename = speech_recognizer.record()
+    audio_data = speech_recognizer.record()
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
-    if not filename:
+    if not audio_data:
         return
 
-    transcription = speech_recognizer.transcribe(filename)
+    transcription = speech_recognizer.transcribe(audio_data)
+    speech_recognizer.save_recording(audio_data)
     if not transcription:
         return
 
@@ -70,7 +69,7 @@ def run_conversation_cycle():
 
 def main():
     TRIGGER_KEY = "scroll lock"
-    activator = AssistantActivator("hey_jarvis_v0.1")
+    activator = AssistantActivator()
 
     print("🤖 Assistant is running...")
     print(f"👉 Say 'Jarvis' or Press '{TRIGGER_KEY}' to speak.")
