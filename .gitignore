@@ -17,3 +17,4 @@ recordings/
 uv.lock
 
 test.py
+tools/app_cache.json

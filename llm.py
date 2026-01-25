@@ -41,6 +41,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
 
     Notes:
         - If the user wants to open netflix, use the "open_application" tool with app_name "Netflix".
+        - If none of the tools fit the user's request, respond with: {{"tool": "none", "parameters": {{}}}}
     """
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -57,7 +58,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
                 },
             ],
             temperature=0,
-            reasoning_effort="medium",
+            reasoning_effort="medium" if "gpt-oss" in LLM_MODEL else None,
             stream=False,
         )
 

@@ -33,7 +33,6 @@ def run_conversation_cycle():
         return
 
     transcription = speech_recognizer.transcribe(audio_data)
-    speech_recognizer.save_recording(audio_data)
     if not transcription:
         return
 
@@ -51,6 +50,10 @@ def run_conversation_cycle():
             intent = json.loads(intent_json)
             tool_name = intent.get("tool")
             parameters = intent.get("parameters", {})
+            if tool_name.lower() == "none":
+                print("No applicable tool found for the request.")
+                winsound.Beep(500, 500)  # Error sound
+                return
 
             print(f"Executing: {tool_name} with {parameters}")
             result = execute_function(tool_name, parameters)
@@ -65,6 +68,8 @@ def run_conversation_cycle():
         except json.JSONDecodeError:
             print("Error: Failed to parse the intent JSON.")
             winsound.Beep(500, 500)  # Error sound
+
+    speech_recognizer.save_recording(audio_data)
 
 
 def main():

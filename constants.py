@@ -11,7 +11,8 @@ PROJECTS_DIR = "D:/Projects/"
 LLM_MODEL = "meta-llama/llama-4-maverick-17b-128e-instruct"
 
 # Wake Word Model Settings
-JARVIS_DETECTION_THRESHOLD = 0.5
+JARVIS_DETECTION_THRESHOLD = 0.3
+INSA_DETECTION_THRESHOLD = 0.25
 
 KEYWORDS: list[str] = [
     "Spotify",

@@ -27,6 +27,10 @@ class AssistantActivator:
         OR the trigger key is pressed.
         Returns: 'voice' or 'key'
         """
+        # The model reactivates multiple times if it hears the wake word continuously.
+        # Reset it to avoid this.
+        self.model.reset()
+
         # Open the stream
         stream = self.p.open(
             format=self.FORMAT,
