@@ -1,11 +1,41 @@
 import json
+import threading
 import time
 import winsound
 
 import speech_recognizer
 from activator import AssistantActivator
+from cancellation import CancellationWatcher
 from constants import AVAILABLE_FUNCTIONS
 from llm import interpret_intent
+
+
+def run_interruptible(func, watcher, *args, **kwargs):
+    """
+    Runs a function in a separate thread to allow main thread to check for cancellation.
+    Returns early if watcher detects abortion.
+    """
+    result = [None]
+    exception = [None]
+
+    def target():
+        try:
+            result[0] = func(*args, **kwargs)
+        except Exception as e:
+            exception[0] = e
+
+    t = threading.Thread(target=target)
+    t.start()
+
+    while t.is_alive():
+        if watcher.was_aborted():
+            return None
+        time.sleep(0.1)
+
+    if exception[0]:
+        raise exception[0]
+
+    return result[0]
 
 
 def execute_function(function_name: str, args: dict):
@@ -22,59 +52,90 @@ def execute_function(function_name: str, args: dict):
         return f"Error: Function {function_name} is not implemented."
 
 
-def run_conversation_cycle():
+def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
     """
     Runs one full cycle: Record -> Transcribe -> Interpret -> Execute
     """
     start_time = time.perf_counter()
+
+    # =============== Record Audio ===============
+    # Recording is blocking; we start watching AFTER checks specific 'After initial recording' requirement
     audio_data = speech_recognizer.record()
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
     if not audio_data:
         return
 
-    transcription = speech_recognizer.transcribe(audio_data)
-    if not transcription:
-        return
+    # Start watching for "Insa" now that we are processing
+    cancellation_watcher.start()
 
-    print(f"\n User said: {transcription}")
-    print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
+    try:
+        # =============== Transcribe Audio ===============
+        transcription = run_interruptible(
+            speech_recognizer.transcribe, cancellation_watcher, audio_data
+        )
 
-    # Interpret Intent
-    intent_json = interpret_intent(transcription)
-    print(f"Intent: {intent_json}")
-    print(f"Interpretation Time: {time.perf_counter() - start_time:.2f} seconds")
+        if cancellation_watcher.was_aborted():
+            return
+        if not transcription:
+            return
 
-    # Execute
-    if intent_json:
-        try:
-            intent = json.loads(intent_json)
-            tool_name = intent.get("tool")
-            parameters = intent.get("parameters", {})
-            if tool_name.lower() == "none":
-                print("No applicable tool found for the request.")
+        print(f"\n User said: {transcription}")
+        print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
+
+        # ============== Interpret Intent ===============
+        intent_json = run_interruptible(
+            interpret_intent, cancellation_watcher, transcription
+        )
+
+        if cancellation_watcher.was_aborted():
+            return
+
+        print(f"Intent: {intent_json}")
+        print(f"Interpretation Time: {time.perf_counter() - start_time:.2f} seconds")
+
+        # ============= Execute ===============
+        if intent_json:
+            try:
+                intent = json.loads(intent_json)
+                tool_name = intent.get("tool")
+                parameters = intent.get("parameters", {})
+                if tool_name.lower() == "none":
+                    print("No applicable tool found for the request.")
+                    winsound.Beep(500, 500)  # Error sound
+                else:
+                    print(f"Executing: {tool_name} with {parameters}")
+                    result = run_interruptible(
+                        execute_function, cancellation_watcher, tool_name, parameters
+                    )
+
+                    if cancellation_watcher.was_aborted():
+                        return
+
+                    print(f"Result: {result}")
+                    print(
+                        f"Execution Time: {time.perf_counter() - start_time:.2f} seconds"
+                    )
+
+                    # Play a success sound (Low-High)
+                    winsound.Beep(800, 100)
+                    winsound.Beep(1200, 100)
+
+            except json.JSONDecodeError:
+                print("Error: Failed to parse the intent JSON.")
                 winsound.Beep(500, 500)  # Error sound
-                return
 
-            print(f"Executing: {tool_name} with {parameters}")
-            result = execute_function(tool_name, parameters)
+        speech_recognizer.save_recording(audio_data)
 
-            print(f"Result: {result}")
-            print(f"Execution Time: {time.perf_counter() - start_time:.2f} seconds")
-
-            # Play a success sound (Low-High)
-            winsound.Beep(800, 100)
-            winsound.Beep(1200, 100)
-
-        except json.JSONDecodeError:
-            print("Error: Failed to parse the intent JSON.")
-            winsound.Beep(500, 500)  # Error sound
-
-    speech_recognizer.save_recording(audio_data)
+    finally:
+        # Ensure we always stop the watcher (releases microphone)
+        cancellation_watcher.stop()
 
 
 def main():
     TRIGGER_KEY = "scroll lock"
     activator = AssistantActivator()
+
+    cancellation_watcher = CancellationWatcher()
 
     print("🤖 Assistant is running...")
     print(f"👉 Say 'Jarvis' or Press '{TRIGGER_KEY}' to speak.")
@@ -93,7 +154,7 @@ def main():
             # Acknowledgement beep
             winsound.Beep(600, 100)
 
-            run_conversation_cycle()
+            run_conversation_cycle(cancellation_watcher)
             print("\n Waiting for trigger ...")
 
             # Small buffer to prevent immediate re-triggering
