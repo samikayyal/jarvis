@@ -6,7 +6,7 @@ import winsound
 import speech_recognizer
 from activator import AssistantActivator
 from cancellation import CancellationWatcher
-from constants import AVAILABLE_FUNCTIONS
+from constants import AVAILABLE_FUNCTIONS, play_sound_async
 from llm import interpret_intent
 
 
@@ -101,7 +101,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
                 parameters = intent.get("parameters", {})
                 if tool_name.lower() == "none":
                     print("No applicable tool found for the request.")
-                    winsound.Beep(500, 500)  # Error sound
+                    play_sound_async(500, 500)  # Error sound
                 else:
                     print(f"Executing: {tool_name} with {parameters}")
                     result = run_interruptible(
@@ -117,13 +117,12 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
                     )
 
                     # Play a success sound (Low-High)
-                    winsound.Beep(800, 100)
-                    winsound.Beep(1200, 100)
+                    play_sound_async(800, 100)
+                    play_sound_async(1200, 100)
 
             except json.JSONDecodeError:
                 print("Error: Failed to parse the intent JSON.")
-                winsound.Beep(500, 500)  # Error sound
-
+                play_sound_async(500, 500)  # Error sound
         speech_recognizer.save_recording(audio_data)
 
     finally:
@@ -152,7 +151,7 @@ def main():
                 continue
 
             # Acknowledgement beep
-            winsound.Beep(600, 100)
+            play_sound_async(600, 100)
 
             run_conversation_cycle(cancellation_watcher)
             print("\n Waiting for trigger ...")

@@ -7,7 +7,7 @@ import speech_recognition as sr
 from dotenv import load_dotenv
 from groq import Groq
 
-from constants import KEYWORDS  # noqa: F401
+from constants import KEYWORDS, play_sound_async  # noqa: F401
 
 load_dotenv()
 
@@ -26,11 +26,13 @@ def record() -> bytes | None:
         # Minimum audio energy to consider for recording
         recognizer.energy_threshold = 500
 
+        recognizer.dynamic_energy_threshold = False  # Faster startup
+
         # higher sample rate for better quality
         with sr.Microphone(sample_rate=16000) as source:
             print("Please speak now...")
             # Play a sound to indicate recording started
-            winsound.Beep(1000, 200)
+            play_sound_async(1000, 200)
             audio_data = recognizer.listen(source)
             wav_data = audio_data.get_wav_data()
             print("Recording finished")

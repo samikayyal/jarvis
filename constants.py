@@ -1,8 +1,15 @@
+import threading
+import winsound
 from typing import Callable
 
 from tools.browsers import open_url, web_search
 from tools.miscellaneous import press_key, shutdown_system
 from tools.open_apps import open_application, open_directory, open_vscode_project
+
+
+def play_sound_async(freq, duration):
+    threading.Thread(target=winsound.Beep, args=(freq, duration), daemon=True).start()
+
 
 # User specific things, set by user in program settings
 PROJECTS_DIR = "D:/Projects/"

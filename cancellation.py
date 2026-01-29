@@ -5,7 +5,7 @@ import numpy as np
 import pyaudio
 from openwakeword.model import Model
 
-from constants import INSA_DETECTION_THRESHOLD
+from constants import INSA_DETECTION_THRESHOLD, play_sound_async
 
 
 class CancellationWatcher:
@@ -53,8 +53,8 @@ class CancellationWatcher:
                     self._running = False  # Stop the loop
 
                     # Immediate Feedback
-                    winsound.Beep(500, 300)
-                    winsound.Beep(400, 400)
+                    play_sound_async(500, 300)
+                    play_sound_async(400, 400)
                     break
 
         except Exception as e:
