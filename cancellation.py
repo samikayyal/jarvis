@@ -1,5 +1,4 @@
 import threading
-import winsound
 
 import numpy as np
 import pyaudio

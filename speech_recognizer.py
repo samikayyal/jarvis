@@ -1,6 +1,5 @@
 import os
 import time
-import winsound
 from datetime import datetime
 
 import speech_recognition as sr

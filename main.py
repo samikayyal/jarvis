@@ -1,7 +1,6 @@
 import json
 import threading
 import time
-import winsound
 
 import speech_recognizer
 from activator import AssistantActivator
