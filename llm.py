@@ -41,9 +41,10 @@ def interpret_intent(transcribed_text: str) -> str | None:
 
     Notes:
         - If the user wants to open netflix, use the "open_application" tool with app_name "Netflix".
-        - If none of the tools fit the user's request, respond with: {{"tool": "none", "parameters": {{}}}}
-        - If the user says 'Insa انسا', 'cancel', or similar, respond with: {{"tool": "none", "parameters": {{}}}}
+        - If none of the tools fit the user's request, ONLY respond with: {{"tool": "none", "parameters": {{}}}}
+        - If the user says 'Insa انسا', 'cancel', or similar, ONLY respond with: {{"tool": "none", "parameters": {{}}}}
         - The input might be in Arabic Script (افتح سبوتيفاي) or Arabizi (fta7 spotify). Handle both.
+        - The input you receive is the raw transcription from the speech recognizer. Some mistakes may be present. Do your best to understand the user's intent.
     """
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))

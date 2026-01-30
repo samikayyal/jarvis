@@ -30,8 +30,8 @@ def record() -> bytes | None:
         # higher sample rate for better quality
         with sr.Microphone(sample_rate=16000) as source:
             print("Please speak now...")
-            # Play a sound to indicate recording started
             play_sound_async(1000, 200)
+            # Play a sound to indicate recording started
             audio_data = recognizer.listen(source)
             wav_data = audio_data.get_wav_data()
             print("Recording finished")
