@@ -7,6 +7,7 @@ from activator import AssistantActivator
 from cancellation import CancellationWatcher
 from constants import AVAILABLE_FUNCTIONS, play_sound_async
 from llm import interpret_intent
+from volume_control import VolumeMuter
 
 
 def run_interruptible(func, watcher, *args, **kwargs):
@@ -58,8 +59,10 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
     start_time = time.perf_counter()
 
     # =============== Record Audio ===============
-    # Recording is blocking; we start watching AFTER checks specific 'After initial recording' requirement
-    audio_data = speech_recognizer.record()
+    # Mute pc audio during recording, restore previous state after
+    with VolumeMuter():
+        audio_data = speech_recognizer.record()
+
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
     if not audio_data:
         return
