@@ -8,6 +8,28 @@ from constants import LLM_MODEL, PROJECTS_DIR, TOOLS_SCHEMA
 load_dotenv()
 
 
+def clean_json_output(text: str | None) -> str | None:
+    """
+    Cleans the LLM output to ensure it is valid JSON.
+    Removes ```json markers and finds the first '{' and last '}'.
+    """
+    if not text:
+        return None
+
+    # Remove Markdown code block syntax
+    cleaned = text.replace("```json", "").replace("```", "")
+
+    # Find the start and end of the JSON object
+    # (This handles cases where the LLM says "Here is your JSON: { ... }")
+    start_index = cleaned.find("{")
+    end_index = cleaned.rfind("}")
+
+    if start_index != -1 and end_index != -1:
+        cleaned = cleaned[start_index : end_index + 1]
+
+    return cleaned.strip()
+
+
 def interpret_intent(transcribed_text: str) -> str | None:
     projects = "\n - ".join(os.listdir(PROJECTS_DIR))
     downloads_dir = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -20,31 +42,48 @@ def interpret_intent(transcribed_text: str) -> str | None:
     """
 
     system_prompt = f"""
-     You are a smart desktop assistant for a developer. 
-        The user speaks Syrian Arabic mixed with English technical terms.
-        Analyze the user's request and map it to the correct tool function.
-        The user's command may write English technical terms in Arabic.
-        
-        {user_context}
+    SYSTEM IDENTITY:
+    You are J.A.R.V.I.S, a smart desktop assistant for a developer.
+    
+    USER INPUT:
+    - The user speaks Syrian Arabic (Shami) mixed with English technical terms.
+    - Input may be in Arabic Script (e.g., "افتح سبوتيفاي") or Arabizi (e.g., "fta7 spotify").
+    - Transcriptions may contain slight errors; infer intent where possible.
+    
+    YOUR TASKS:
+    1. Analyze the user's request based on the context below.
+    2. Map it to the correct tool function.
+    3. Generate a "speech" response in ENGLISH.
+    
+    SPEECH GUIDELINES (JARVIS PERSONA):
+    - Tone: Calm, dry, British wit, highly professional.
+    - Content: Concise updates. No fake enthusiasm (no exclamation marks).
+    - Style: Use words like "Protocols", "Initializing", "Sir", "Aborting".
+    
+    {user_context}
 
-        Here are the available tools and their schemas:
-        {TOOLS_SCHEMA}
+    AVAILABLE TOOLS:
+    {TOOLS_SCHEMA}
         
-    You should only respond with a JSON object that specifies the tool to use and its parameters.
-    Example response:
+    RESPONSE FORMAT:
+    You must ONLY respond with a JSON object. DO NOT respond with anything else.
     {{
-        "tool": "open_application",
-        "parameters": {{
-            "app_name": "VSCode"
-        }}
+        "tool": "tool_name_or_none",
+        "parameters": {{ ... }},
+        "speech": "The verbal response in English."
     }}
 
-    Notes:
-        - If the user wants to open netflix, use the "open_application" tool with app_name "Netflix".
-        - If none of the tools fit the user's request, ONLY respond with: {{"tool": "none", "parameters": {{}}}}
-        - If the user says 'Insa انسا', 'cancel', or similar, ONLY respond with: {{"tool": "none", "parameters": {{}}}}
-        - The input might be in Arabic Script (افتح سبوتيفاي) or Arabizi (fta7 spotify). Handle both.
-        - The input you receive is the raw transcription from the speech recognizer. Some mistakes may be present. Do your best to understand the user's intent.
+    HANDLING RULES:
+    - If the user wants to open Netflix, use "open_application" with "Netflix".
+    
+    - If the user says 'Insa', 'Cancel', 'Khalas', or similar:
+      Output: {{"tool": "none", "parameters": {{}}, "speech": "Aborting."}}
+      
+    - If no tool fits the request (or you are just chatting):
+      Output: {{"tool": "none", "parameters": {{}}, "speech": "I am unsure how to proceed with that request, sir."}}
+      
+    - If the request is purely conversational (e.g., "Kifak?"):
+      Output: {{"tool": "none", "parameters": {{}}, "speech": "All systems operational. Ready for input."}}
     """
     try:
         client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -65,7 +104,7 @@ def interpret_intent(transcribed_text: str) -> str | None:
             stream=False,
         )
 
-        return completion.choices[0].message.content or None
+        return clean_json_output(completion.choices[0].message.content) or None
     except Exception as e:
         print(f"[!] Error interpreting intent: {e}")
         return None

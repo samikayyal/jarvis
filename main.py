@@ -7,6 +7,7 @@ from activator import AssistantActivator
 from cancellation import CancellationWatcher
 from constants import AVAILABLE_FUNCTIONS, play_sound_async
 from llm import interpret_intent
+from tts import speak
 from volume_control import VolumeMuter
 
 
@@ -64,6 +65,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
         audio_data = speech_recognizer.record()
 
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
+    start_time = time.perf_counter()
     if not audio_data:
         return
 
@@ -83,6 +85,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
 
         print(f"\n User said: {transcription}")
         print(f"Transcription Time: {time.perf_counter() - start_time:.2f} seconds")
+        start_time = time.perf_counter()
 
         # ============== Interpret Intent ===============
         intent_json = run_interruptible(
@@ -94,6 +97,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
 
         print(f"Intent: {intent_json}")
         print(f"Interpretation Time: {time.perf_counter() - start_time:.2f} seconds")
+        start_time = time.perf_counter()
 
         # ============= Execute ===============
         if intent_json:
@@ -122,9 +126,15 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
                     play_sound_async(800, 100)
                     play_sound_async(1200, 100)
 
+                # ============== Speak the response ===============
+                speech = intent.get("speech", "")
+                if speech:
+                    speak(speech)
+
             except json.JSONDecodeError:
                 print("Error: Failed to parse the intent JSON.")
                 play_sound_async(500, 500)  # Error sound
+
         speech_recognizer.save_recording(audio_data)
 
     finally:
