@@ -12,10 +12,14 @@ wheels/
 # Environment variables file
 .env
 
-# Misc
+# Data
 recordings/
+responses/
+responses_cache.json
+tools/app_cache.json
+
+# Misc
 uv.lock
 
 test.py
-tools/app_cache.json
 notes.txt

@@ -8,7 +8,6 @@ from cancellation import CancellationWatcher
 from constants import AVAILABLE_FUNCTIONS, play_sound_async
 from llm import interpret_intent
 from tts import speak
-from volume_control import VolumeMuter
 
 
 def run_interruptible(func, watcher, *args, **kwargs):
@@ -61,8 +60,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
 
     # =============== Record Audio ===============
     # Mute pc audio during recording, restore previous state after
-    with VolumeMuter():
-        audio_data = speech_recognizer.record()
+    audio_data = speech_recognizer.record()
 
     print(f"Recording Time: {time.perf_counter() - start_time:.2f} seconds")
     start_time = time.perf_counter()
@@ -105,7 +103,7 @@ def run_conversation_cycle(cancellation_watcher: CancellationWatcher):
                 intent = json.loads(intent_json)
                 tool_name = intent.get("tool")
                 parameters = intent.get("parameters", {})
-                if tool_name.lower() == "none":
+                if not tool_name or tool_name.lower() == "none":
                     print("No applicable tool found for the request.")
                     play_sound_async(500, 500)  # Error sound
                 else:

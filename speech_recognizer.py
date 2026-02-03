@@ -8,6 +8,7 @@ from groq import Groq
 
 from constants import KEYWORDS, play_sound_async  # noqa: F401
 from tts import speak
+from volume_control import VolumeMuter
 
 load_dotenv()
 
@@ -34,9 +35,10 @@ def record() -> bytes | None:
             print("Please speak now...")
             # Play a sound to indicate recording started
             # play_sound_async(1000, 200)
-            audio_data = recognizer.listen(source)
-            wav_data = audio_data.get_wav_data()
-            print("Recording finished")
+            with VolumeMuter():
+                audio_data = recognizer.listen(source)
+                wav_data = audio_data.get_wav_data()
+                print("Recording finished")
 
         return wav_data
     except Exception as e:

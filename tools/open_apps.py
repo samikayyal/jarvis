@@ -111,7 +111,9 @@ def open_vscode_project(path: str) -> str:
 
 
 def open_university_portal() -> str:
+    """TODO: Implement university portal automation."""
     print("[*] Opening PSUT Portal")
+    return "Not Implemented"
     # browser.get("https://portal.psut.edu.jo")
 
     # # Define wait object

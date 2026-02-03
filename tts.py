@@ -53,8 +53,6 @@ def _save_cache():
     global _cache
     with open(CACHE_FILE, "w", encoding="utf-8") as f:
         json.dump(_cache, f, indent=4, ensure_ascii=False)
-    # Reload cache after saving
-    _load_cache()
 
 
 def _get_cached_file(text: str) -> str | None:
@@ -145,12 +143,12 @@ def speak(text: str):
 
             while pygame.mixer.music.get_busy():
                 pygame.time.Clock().tick(10)
-
-            pygame.mixer.quit()
             return
         except Exception as e:
             print(f"[!] Cache Playback Error: {e}")
             # Fall through to regenerate
+        finally:
+            pygame.mixer.quit()
 
     try:
         # 1. Generate Raw
@@ -173,13 +171,14 @@ def speak(text: str):
 
         # 3. Play
         pygame.mixer.init()
-        pygame.mixer.music.load(playback_file)
-        pygame.mixer.music.play()
+        try:
+            pygame.mixer.music.load(playback_file)
+            pygame.mixer.music.play()
 
-        while pygame.mixer.music.get_busy():
-            pygame.time.Clock().tick(10)
-
-        pygame.mixer.quit()
+            while pygame.mixer.music.get_busy():
+                pygame.time.Clock().tick(10)
+        finally:
+            pygame.mixer.quit()
 
     except Exception as e:
         print(f"[!] Playback Error: {e}")
