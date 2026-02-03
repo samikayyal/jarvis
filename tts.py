@@ -1,5 +1,7 @@
 import asyncio
+import json
 import os
+import uuid
 
 import edge_tts
 import pygame
@@ -26,6 +28,53 @@ RATE = "+15%"
 # Files
 BUFFER_FILE = "raw_audio.mp3"
 PROCESSED_FILE = "jarvis_output.wav"
+
+# Cache
+CACHE_DIR = "responses"
+CACHE_FILE = "responses_cache.json"
+
+# In-memory cache
+_cache: dict[str, str] = {}
+
+
+def _load_cache() -> dict[str, str]:
+    """Load cache from disk into memory."""
+    global _cache
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+            _cache = json.load(f)
+    else:
+        _cache = {}
+    return _cache
+
+
+def _save_cache():
+    """Save in-memory cache to disk."""
+    global _cache
+    with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        json.dump(_cache, f, indent=4, ensure_ascii=False)
+    # Reload cache after saving
+    _load_cache()
+
+
+def _get_cached_file(text: str) -> str | None:
+    """Check if text is cached and return the file path if it exists."""
+    if text in _cache:
+        cached_path = os.path.join(CACHE_DIR, _cache[text])
+        if os.path.exists(cached_path):
+            return cached_path
+    return None
+
+
+def _add_to_cache(text: str, filename: str):
+    """Add a new entry to the cache."""
+    _cache[text] = filename
+    _save_cache()
+
+
+# Initialize cache on module load
+os.makedirs(CACHE_DIR, exist_ok=True)
+_load_cache()
 
 
 async def _generate_audio(text):
@@ -85,14 +134,42 @@ def _process_audio_dsp():
 
 def speak(text: str):
     print(f"🗣️ Jarvis: {text}")
+
+    # Check cache first
+    cached_file = _get_cached_file(text)
+    if cached_file:
+        try:
+            pygame.mixer.init()
+            pygame.mixer.music.load(cached_file)
+            pygame.mixer.music.play()
+
+            while pygame.mixer.music.get_busy():
+                pygame.time.Clock().tick(10)
+
+            pygame.mixer.quit()
+            return
+        except Exception as e:
+            print(f"[!] Cache Playback Error: {e}")
+            # Fall through to regenerate
+
     try:
         # 1. Generate Raw
         asyncio.run(_generate_audio(text))
 
         # 2. Process
-        playback_file = BUFFER_FILE
         if _process_audio_dsp():
-            playback_file = PROCESSED_FILE
+            # Generate unique filename and cache it
+            unique_id = uuid.uuid4().hex[:8]
+            cached_filename = f"response_{unique_id}.wav"
+            cached_path = os.path.join(CACHE_DIR, cached_filename)
+
+            # Move processed file to cache
+            os.rename(PROCESSED_FILE, cached_path)
+            _add_to_cache(text, cached_filename)
+
+            playback_file = cached_path
+        else:
+            playback_file = BUFFER_FILE
 
         # 3. Play
         pygame.mixer.init()
@@ -107,7 +184,7 @@ def speak(text: str):
     except Exception as e:
         print(f"[!] Playback Error: {e}")
     finally:
-        # Cleanup
+        # Cleanup temp files only (cached files are kept)
         if os.path.exists(BUFFER_FILE):
             os.remove(BUFFER_FILE)
         if os.path.exists(PROCESSED_FILE):
@@ -116,4 +193,5 @@ def speak(text: str):
 
 if __name__ == "__main__":
     # Test phrase with lots of 'S' and 'T' sounds to test crispness
-    speak("System diagnostics complete. All systems online. Ready for input, sir.")
+    # speak("System diagnostics complete. All systems online. Ready for input, sir.")
+    speak("Yes sir.")

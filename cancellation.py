@@ -85,3 +85,19 @@ class CancellationWatcher:
     def was_aborted(self):
         """Check if the flag was set."""
         return self._aborted
+
+
+if __name__ == "__main__":
+    watcher = CancellationWatcher()
+
+    try:
+        while True:
+            watcher.start()
+            print("Say 'Insa' to abort. (Ctrl+C to exit)")
+            while not watcher.was_aborted():
+                pass
+            print("Insa detected, aborting main task.\n\n")
+            watcher.stop()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        watcher.stop()

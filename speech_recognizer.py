@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from groq import Groq
 
 from constants import KEYWORDS, play_sound_async  # noqa: F401
+from tts import speak
 
 load_dotenv()
 
@@ -29,9 +30,10 @@ def record() -> bytes | None:
 
         # higher sample rate for better quality
         with sr.Microphone(sample_rate=16000) as source:
+            speak("Yes sir.")
             print("Please speak now...")
-            play_sound_async(1000, 200)
             # Play a sound to indicate recording started
+            # play_sound_async(1000, 200)
             audio_data = recognizer.listen(source)
             wav_data = audio_data.get_wav_data()
             print("Recording finished")
